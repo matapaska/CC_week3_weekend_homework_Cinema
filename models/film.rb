@@ -41,7 +41,8 @@ class Film
     WHERE tickets.film_id = $1"
     values = [@id]
     customers = SqlRunner.run(sql, values)
-    return customers.map{|customer| Customer.new(customer)}
+    customers_no = customers.map{|customer| Customer.new(customer)}
+    return customers_no.size
   end
 
   def self.all()

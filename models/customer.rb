@@ -10,15 +10,6 @@ class Customer
     @funds = options['funds'].to_i
   end
 
-  def films()
-    sql = "SELECT films.* FROM films
-    INNER JOIN tickets ON films.id = tickets.film_id
-    WHERE tickets.customer_id = $1"
-    values = [@id]
-    film_info = SqlRunner.run(sql, values)
-    return film_info.map{|film| Film.new(film)}
-  end
-
   def save()
     sql = "INSERT INTO customers(name, funds)
       VALUES($1, $2)
@@ -40,6 +31,31 @@ class Customer
     sql = "DELETE FROM customers WHERE id = $1"
     values = [@id]
     SqlRunner.run(sql, values)
+  end
+
+  def films()
+    sql = "SELECT films.* FROM films
+    INNER JOIN tickets ON films.id = tickets.film_id
+    WHERE tickets.customer_id = $1"
+    values = [@id]
+    film_info = SqlRunner.run(sql, values)
+    return film_info.map{|film| Film.new(film)}
+  end
+
+  def deducting_film_price()
+    films = self.films()
+    prices = films.map{|film| film.price}
+    total_cost = prices.sum
+    return @funds - total_cost
+  end
+
+  def tickets()
+    sql = "SELECT tickets.customer_id FROM tickets
+    WHERE customer_id = $1"
+    values = [@id]
+    ticket_info = SqlRunner.run(sql, values)
+    tickets = ticket_info.map{|ticket| Ticket.new(ticket)}
+    return tickets.size
   end
 
   def self.all()
